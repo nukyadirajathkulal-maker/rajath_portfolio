@@ -1,56 +1,117 @@
-const menuToggle = document.getElementById("menuToggle");
-const navMenu = document.getElementById("navMenu");
+document.addEventListener("DOMContentLoaded", () => {
 
-// Mobile navigation
-menuToggle.addEventListener("click", () => {
-    const isOpen = navMenu.classList.toggle("show");
+    // =========================
+    // MOBILE NAVIGATION
+    // =========================
 
-    menuToggle.setAttribute("aria-expanded", isOpen);
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
 
-    menuToggle.textContent = isOpen ? "✕" : "☰";
-});
+    if (menuToggle && navMenu) {
 
-// Close menu after clicking a navigation link
-document.querySelectorAll("#navMenu a").forEach(link => {
+        menuToggle.addEventListener("click", () => {
+            const isOpen = navMenu.classList.toggle("show");
 
-    link.addEventListener("click", () => {
-        navMenu.classList.remove("show");
+            menuToggle.setAttribute("aria-expanded", isOpen);
+            menuToggle.textContent = isOpen ? "✕" : "☰";
+        });
 
-        menuToggle.textContent = "☰";
-        menuToggle.setAttribute("aria-expanded", "false");
-    });
+        document.querySelectorAll("#navMenu a").forEach(link => {
+            link.addEventListener("click", () => {
+                navMenu.classList.remove("show");
+                menuToggle.textContent = "☰";
+                menuToggle.setAttribute("aria-expanded", "false");
+            });
+        });
+    }
 
-});
 
-// Active navigation highlighting
-const sections = document.querySelectorAll("main section");
-const navLinks = document.querySelectorAll("#navMenu a");
+    // =========================
+    // ACTIVE NAVIGATION
+    // =========================
 
-const observer = new IntersectionObserver((entries) => {
+    const sections = document.querySelectorAll("main section");
+    const navLinks = document.querySelectorAll("#navMenu a");
 
-    entries.forEach(entry => {
+    if ("IntersectionObserver" in window) {
 
-        if (entry.isIntersecting) {
+        const observer = new IntersectionObserver(entries => {
 
-            const currentId = entry.target.id;
+            entries.forEach(entry => {
 
-            navLinks.forEach(link => {
+                if (entry.isIntersecting && entry.target.id) {
 
-                link.classList.toggle(
-                    "active",
-                    link.getAttribute("href") === `#${currentId}`
-                );
+                    const currentId = entry.target.id;
+
+                    navLinks.forEach(link => {
+                        link.classList.toggle(
+                            "active",
+                            link.getAttribute("href") === `#${currentId}`
+                        );
+                    });
+
+                }
 
             });
 
+        }, {
+            rootMargin: "-30% 0px -60% 0px"
+        });
+
+        sections.forEach(section => observer.observe(section));
+    }
+
+
+    // =========================
+    // FULL SCREEN UI PREVIEW
+    // =========================
+
+    const screenImages = document.querySelectorAll(".screen-card img");
+    const imageLightbox = document.getElementById("imageLightbox");
+    const lightboxImage = document.getElementById("lightboxImage");
+    const closeLightbox = document.getElementById("closeLightbox");
+
+    if (imageLightbox && lightboxImage && closeLightbox) {
+
+        // Open selected image
+        screenImages.forEach(image => {
+
+            image.addEventListener("click", () => {
+
+                imageLightbox.classList.add("active");
+                lightboxImage.src = image.src;
+                lightboxImage.alt = image.alt;
+
+                document.body.style.overflow = "hidden";
+            });
+
+        });
+
+        // Close preview
+        function closePreview() {
+            imageLightbox.classList.remove("active");
+            lightboxImage.src = "";
+            document.body.style.overflow = "";
         }
 
-    });
+        closeLightbox.addEventListener("click", closePreview);
 
-}, {
-    rootMargin: "-30% 0px -60% 0px"
-});
+        // Close by clicking outside image
+        imageLightbox.addEventListener("click", event => {
+            if (event.target === imageLightbox) {
+                closePreview();
+            }
+        });
 
-sections.forEach(section => {
-    observer.observe(section);
+        // Close using Escape key
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape" &&
+                imageLightbox.classList.contains("active")) {
+                closePreview();
+            }
+        });
+
+    }
+
 });
+```
